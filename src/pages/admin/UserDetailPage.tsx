@@ -686,7 +686,7 @@ export default function UserDetailPage() {
             <TabsContent value="subscription" className="space-y-4">
               <SubscriptionManagement
                 subscription={subscription}
-                userId={userId}
+                userId={userId!}
                 userName={user.name}
                 currency={user.currency}
                 onSubscriptionUpdate={fetchUserDetails}

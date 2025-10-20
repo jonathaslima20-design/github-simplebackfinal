@@ -34,7 +34,7 @@ import type { Subscription, SubscriptionStatus, PaymentStatus, BillingCycle } fr
 
 interface SubscriptionManagementProps {
   subscription: Subscription | null;
-  userId: string;
+  userId?: string;
   userName: string;
   currency?: string;
   onSubscriptionUpdate: () => void;
@@ -157,6 +157,11 @@ export default function SubscriptionManagement({
   };
 
   const handleCreateSubscription = async () => {
+    if (!userId) {
+      toast.error('ID do usuário não encontrado');
+      return;
+    }
+
     setIsUpdating(true);
     try {
       const { error } = await supabase

@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 
 type Theme = 'light' | 'dark';
 
@@ -14,7 +13,6 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light');
   const [isLoaded, setIsLoaded] = useState(false);
-  const location = useLocation();
 
   useEffect(() => {
     // Get saved theme or system preference
@@ -54,19 +52,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoaded) return;
-    
-    // Check if current route is an external storefront page
-    const isStorefrontPage = location.pathname.match(/^\/[^\/]+$/) || 
-                            location.pathname.match(/^\/[^\/]+\/produtos\/[^\/]+$/);
-    
-    // Only apply theme if NOT on storefront pages
-    if (!isStorefrontPage) {
-      const root = window.document.documentElement;
-      root.classList.remove('light', 'dark');
-      root.classList.add(theme);
-      localStorage.setItem('theme', theme);
-    }
-  }, [theme, isLoaded, location.pathname]);
+
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
+    localStorage.setItem('theme', theme);
+  }, [theme, isLoaded]);
 
   const value = {
     theme,

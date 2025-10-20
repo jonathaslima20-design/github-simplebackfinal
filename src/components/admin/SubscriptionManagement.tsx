@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
-import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -61,10 +60,6 @@ export default function SubscriptionManagement({
     next_payment_date: subscription?.next_payment_date || '',
   });
 
-  const { plans, loading: plansLoading } = useSubscriptionPlans();
-  const [selectedPlanId, setSelectedPlanId] = useState<string>('standard');
-  const [isCustomPlan, setIsCustomPlan] = useState(false);
-
   const [createForm, setCreateForm] = useState({
     plan_name: 'Plano Básico',
     monthly_price: 29.90,
@@ -74,35 +69,6 @@ export default function SubscriptionManagement({
     start_date: format(new Date(), 'yyyy-MM-dd'),
     next_payment_date: format(addMonths(new Date(), 1), 'yyyy-MM-dd'),
   });
-
-  useEffect(() => {
-    if (selectedPlanId === 'custom') {
-      setIsCustomPlan(true);
-    } else if (selectedPlanId !== 'standard') {
-      setIsCustomPlan(false);
-      const selectedPlan = plans.find(p => p.id === selectedPlanId);
-      if (selectedPlan) {
-        const billingCycle = getBillingCycleFromDuration(selectedPlan.duration);
-        const monthlyPrice = calculateMonthlyPrice(selectedPlan.price, billingCycle);
-        setCreateForm(prev => ({
-          ...prev,
-          plan_name: selectedPlan.name,
-          monthly_price: monthlyPrice,
-          billing_cycle: billingCycle,
-          next_payment_date: calculateNextPaymentDate(prev.start_date, billingCycle)
-        }));
-      }
-    } else {
-      setIsCustomPlan(false);
-      setCreateForm(prev => ({
-        ...prev,
-        plan_name: 'Plano Básico',
-        monthly_price: 29.90,
-        billing_cycle: 'monthly' as BillingCycle,
-        next_payment_date: calculateNextPaymentDate(prev.start_date, 'monthly')
-      }));
-    }
-  }, [selectedPlanId, plans]);
 
   const handleToggleStatus = async () => {
     if (!subscription) return;
@@ -338,49 +304,6 @@ export default function SubscriptionManagement({
     }
   };
 
-  const calculateTotalPrice = (monthlyPrice: number, cycle: BillingCycle): number => {
-    switch (cycle) {
-      case 'monthly':
-        return monthlyPrice;
-      case 'quarterly':
-        return monthlyPrice * 3;
-      case 'semiannually':
-        return monthlyPrice * 6;
-      case 'annually':
-        return monthlyPrice * 12;
-      default:
-        return monthlyPrice;
-    }
-  };
-
-  const getBillingCycleFromDuration = (duration: string): BillingCycle => {
-    switch (duration.toLowerCase()) {
-      case 'trimestral':
-        return 'quarterly';
-      case 'semestral':
-        return 'semiannually';
-      case 'anual':
-        return 'annually';
-      default:
-        return 'monthly';
-    }
-  };
-
-  const calculateMonthlyPrice = (totalPrice: number, cycle: BillingCycle): number => {
-    switch (cycle) {
-      case 'monthly':
-        return totalPrice;
-      case 'quarterly':
-        return totalPrice / 3;
-      case 'semiannually':
-        return totalPrice / 6;
-      case 'annually':
-        return totalPrice / 12;
-      default:
-        return totalPrice;
-    }
-  };
-
   if (!subscription) {
     return (
       <Card>
@@ -408,109 +331,40 @@ export default function SubscriptionManagement({
 
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="plan-selector">Selecionar Plano</Label>
+                  <Label htmlFor="create-billing-cycle">Periodicidade do Plano</Label>
                   <Select
-                    value={selectedPlanId}
-                    onValueChange={setSelectedPlanId}
-                    disabled={plansLoading}
+                    value={createForm.billing_cycle}
+                    onValueChange={(value) => {
+                      const newCycle = value as BillingCycle;
+                      setCreateForm({
+                        ...createForm,
+                        billing_cycle: newCycle,
+                        next_payment_date: calculateNextPaymentDate(createForm.start_date, newCycle)
+                      });
+                    }}
                   >
-                    <SelectTrigger id="plan-selector">
-                      <SelectValue placeholder="Selecione um plano" />
+                    <SelectTrigger id="create-billing-cycle">
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="standard">Plano Básico (Mensal - R$ 29,90)</SelectItem>
-                      {plans.map((plan) => (
-                        <SelectItem key={plan.id} value={plan.id}>
-                          {plan.name} - {new Intl.NumberFormat('pt-BR', {
-                            style: 'currency',
-                            currency: currency,
-                          }).format(plan.price)}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="custom">Personalizado...</SelectItem>
+                      <SelectItem value="monthly">Mensal</SelectItem>
+                      <SelectItem value="quarterly">Trimestral (3 meses)</SelectItem>
+                      <SelectItem value="semiannually">Semestral (6 meses)</SelectItem>
+                      <SelectItem value="annually">Anual (12 meses)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                {isCustomPlan && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="create-plan-name">Nome do Plano</Label>
-                      <Input
-                        id="create-plan-name"
-                        value={createForm.plan_name}
-                        onChange={(e) => setCreateForm({ ...createForm, plan_name: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="create-monthly-price">Valor Mensal (Base)</Label>
-                      <Input
-                        id="create-monthly-price"
-                        type="number"
-                        step="0.01"
-                        value={createForm.monthly_price}
-                        onChange={(e) => setCreateForm({ ...createForm, monthly_price: parseFloat(e.target.value) })}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="create-billing-cycle">Periodicidade do Plano</Label>
-                      <Select
-                        value={createForm.billing_cycle}
-                        onValueChange={(value) => {
-                          const newCycle = value as BillingCycle;
-                          setCreateForm({
-                            ...createForm,
-                            billing_cycle: newCycle,
-                            next_payment_date: calculateNextPaymentDate(createForm.start_date, newCycle)
-                          });
-                        }}
-                      >
-                        <SelectTrigger id="create-billing-cycle">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="monthly">Mensal</SelectItem>
-                          <SelectItem value="quarterly">Trimestral (3 meses)</SelectItem>
-                          <SelectItem value="semiannually">Semestral (6 meses)</SelectItem>
-                          <SelectItem value="annually">Anual (12 meses)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </>
-                )}
-
-                {!isCustomPlan && (
-                  <div className="space-y-2 p-4 bg-muted rounded-lg">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Plano:</span>
-                      <span className="text-sm">{createForm.plan_name}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Periodicidade:</span>
-                      <span className="text-sm">{getBillingCycleLabel(createForm.billing_cycle)}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Valor Mensal:</span>
-                      <span className="text-sm font-semibold">
-                        {new Intl.NumberFormat('pt-BR', {
-                          style: 'currency',
-                          currency: currency,
-                        }).format(createForm.monthly_price)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Valor Total:</span>
-                      <span className="text-sm font-bold text-primary">
-                        {new Intl.NumberFormat('pt-BR', {
-                          style: 'currency',
-                          currency: currency,
-                        }).format(calculateTotalPrice(createForm.monthly_price, createForm.billing_cycle))}
-                      </span>
-                    </div>
-                  </div>
-                )}
+                <div className="space-y-2">
+                  <Label htmlFor="create-monthly-price">Valor Mensal</Label>
+                  <Input
+                    id="create-monthly-price"
+                    type="number"
+                    step="0.01"
+                    value={createForm.monthly_price}
+                    onChange={(e) => setCreateForm({ ...createForm, monthly_price: parseFloat(e.target.value) })}
+                  />
+                </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="create-status">Status</Label>
@@ -546,32 +400,14 @@ export default function SubscriptionManagement({
                   </Select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="create-start-date">Data de Início</Label>
-                    <Input
-                      id="create-start-date"
-                      type="date"
-                      value={createForm.start_date}
-                      onChange={(e) => {
-                        setCreateForm({
-                          ...createForm,
-                          start_date: e.target.value,
-                          next_payment_date: calculateNextPaymentDate(e.target.value, createForm.billing_cycle)
-                        });
-                      }}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="create-next-payment">Próximo Pagamento</Label>
-                    <Input
-                      id="create-next-payment"
-                      type="date"
-                      value={createForm.next_payment_date}
-                      onChange={(e) => setCreateForm({ ...createForm, next_payment_date: e.target.value })}
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="create-next-payment">Próximo Pagamento</Label>
+                  <Input
+                    id="create-next-payment"
+                    type="date"
+                    value={createForm.next_payment_date}
+                    onChange={(e) => setCreateForm({ ...createForm, next_payment_date: e.target.value })}
+                  />
                 </div>
               </div>
 
@@ -617,26 +453,6 @@ export default function SubscriptionManagement({
 
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-plan-name">Nome do Plano</Label>
-                  <Input
-                    id="edit-plan-name"
-                    value={editForm.plan_name}
-                    onChange={(e) => setEditForm({ ...editForm, plan_name: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="edit-monthly-price">Valor Mensal (Base)</Label>
-                  <Input
-                    id="edit-monthly-price"
-                    type="number"
-                    step="0.01"
-                    value={editForm.monthly_price}
-                    onChange={(e) => setEditForm({ ...editForm, monthly_price: parseFloat(e.target.value) })}
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="edit-billing-cycle">Periodicidade do Plano</Label>
                   <Select
                     value={editForm.billing_cycle}
@@ -657,12 +473,17 @@ export default function SubscriptionManagement({
                       <SelectItem value="annually">Anual (12 meses)</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-sm text-muted-foreground">
-                    Valor total: {new Intl.NumberFormat('pt-BR', {
-                      style: 'currency',
-                      currency: currency,
-                    }).format(calculateTotalPrice(editForm.monthly_price, editForm.billing_cycle as BillingCycle))}
-                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-monthly-price">Valor Mensal</Label>
+                  <Input
+                    id="edit-monthly-price"
+                    type="number"
+                    step="0.01"
+                    value={editForm.monthly_price}
+                    onChange={(e) => setEditForm({ ...editForm, monthly_price: parseFloat(e.target.value) })}
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -727,17 +548,13 @@ export default function SubscriptionManagement({
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <div className="text-sm text-muted-foreground mb-1">Plano</div>
-              <div className="font-semibold">{subscription.plan_name}</div>
-            </div>
-            <div>
               <div className="text-sm text-muted-foreground mb-1">Periodicidade</div>
               <Badge variant="outline">
                 {getBillingCycleLabel(subscription.billing_cycle)}
               </Badge>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground mb-1">Valor Mensal (Base)</div>
+              <div className="text-sm text-muted-foreground mb-1">Valor Mensal</div>
               <div className="font-semibold">
                 {new Intl.NumberFormat('pt-BR', {
                   style: 'currency',
@@ -746,22 +563,13 @@ export default function SubscriptionManagement({
               </div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground mb-1">Valor Total ({getBillingCycleLabel(subscription.billing_cycle)})</div>
-              <div className="font-semibold text-lg text-primary">
-                {new Intl.NumberFormat('pt-BR', {
-                  style: 'currency',
-                  currency: currency,
-                }).format(calculateTotalPrice(subscription.monthly_price, subscription.billing_cycle))}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Status do Plano</div>
+              <div className="text-sm text-muted-foreground mb-1">Status</div>
               <Badge className={getStatusColor(subscription.status)}>
                 {getStatusLabel(subscription.status)}
               </Badge>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground mb-1">Status do Pagamento</div>
+              <div className="text-sm text-muted-foreground mb-1">Status Pagamento</div>
               <Badge
                 variant={
                   subscription.payment_status === 'paid' ? 'default' :
@@ -771,13 +579,6 @@ export default function SubscriptionManagement({
               >
                 {getPaymentStatusLabel(subscription.payment_status)}
               </Badge>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Data de Início</div>
-              <div className="font-semibold flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                {format(new Date(subscription.start_date), 'dd/MM/yyyy', { locale: ptBR })}
-              </div>
             </div>
             <div>
               <div className="text-sm text-muted-foreground mb-1">Próximo Pagamento</div>

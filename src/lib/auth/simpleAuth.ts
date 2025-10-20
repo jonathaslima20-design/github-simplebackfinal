@@ -230,27 +230,30 @@ export async function authenticateUser(email: string, password: string): Promise
       };
     }
 
+    // Normalize email to lowercase
+    const normalizedEmail = email.trim().toLowerCase();
+
     // Use Supabase's native authentication
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
+      email: normalizedEmail,
       password: password
     });
 
     if (authError) {
       console.error('🔐 Authentication error:', authError);
-      
+
       // Handle specific authentication errors
       if (authError.message?.includes('Failed to fetch')) {
-        return { 
-          user: null, 
-          error: 'Erro de conexão durante a autenticação. Verifique sua conexão e tente novamente.' 
+        return {
+          user: null,
+          error: 'Erro de conexão durante a autenticação. Verifique sua conexão e tente novamente.'
         };
       }
-      
+
       if (authError.message?.includes('Invalid login credentials')) {
         return { user: null, error: 'E-mail ou senha incorretos' };
       }
-      
+
       return { user: null, error: authError.message || 'E-mail ou senha incorretos' };
     }
 
@@ -262,8 +265,8 @@ export async function authenticateUser(email: string, password: string): Promise
     const { data: userProfile, error: profileError } = await supabase
       .from('users')
       .select('*')
-      .eq('email', email.trim())
-      .single();
+      .eq('email', normalizedEmail)
+      .maybeSingle();
 
     if (profileError || !userProfile) {
       console.error('🔐 Profile fetch error:', profileError);
@@ -283,8 +286,8 @@ export async function authenticateUser(email: string, password: string): Promise
       return { user: null, error: 'BLOCKED_USER' };
     }
 
-    // Store credentials for future auto-login
-    storeCredentials(email, password);
+    // Store credentials for future auto-login (with normalized email)
+    storeCredentials(normalizedEmail, password);
 
     // Store user data with session
     storeUser(userProfile);
@@ -319,9 +322,12 @@ export async function registerUser(
   try {
     console.log('📝 Attempting Supabase registration for:', email);
 
+    // Normalize email to lowercase
+    const normalizedEmail = email.trim().toLowerCase();
+
     // Use Supabase's native authentication for registration
     const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: email.trim(),
+      email: normalizedEmail,
       password: password
     });
 
@@ -341,7 +347,7 @@ export async function registerUser(
     const { data: userProfile, error: createError } = await supabase
       .from('users')
       .insert({
-        email: email.trim(),
+        email: normalizedEmail,
         name: userData.name,
         niche_type: userData.niche_type || 'diversos',
         whatsapp: userData.whatsapp,
@@ -357,8 +363,8 @@ export async function registerUser(
       return { user: null, error: 'Erro ao criar usuário' };
     }
 
-    // Store credentials and user data
-    storeCredentials(email, password);
+    // Store credentials and user data (with normalized email)
+    storeCredentials(normalizedEmail, password);
     storeUser(userProfile);
 
     console.log('✅ Supabase registration successful');

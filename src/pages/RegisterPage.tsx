@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import {
   Form,
   FormControl,
@@ -197,11 +198,10 @@ export default function RegisterPage() {
                     <FormItem>
                       <FormLabel>Senha</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="******" 
-                          type="password" 
-                          disabled={isLoading} 
-                          {...field} 
+                        <PasswordInput
+                          placeholder="******"
+                          disabled={isLoading}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -216,11 +216,10 @@ export default function RegisterPage() {
                     <FormItem>
                       <FormLabel>Confirmar Senha</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="******" 
-                          type="password" 
-                          disabled={isLoading} 
-                          {...field} 
+                        <PasswordInput
+                          placeholder="******"
+                          disabled={isLoading}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />

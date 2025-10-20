@@ -7,7 +7,7 @@ import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
 import type { User } from '@/types';
 import { getErrorMessage } from '@/lib/errorMessages';
 import { UserListControls } from '@/components/admin/UserListControls';
-import { UserList } from '@/components/admin/UserList';
+import { UserTable } from '@/components/admin/UserTable';
 import { FloatingUserBulkActions } from '@/components/admin/FloatingUserBulkActions';
 import { UserSummaryCards } from '@/components/admin/UserSummaryCards';
 import { SimpleCopyProductsDialog } from '@/components/admin/SimpleCopyProductsDialog';
@@ -397,8 +397,8 @@ export default function UsersManagementPage() {
         filteredUsers={filteredUsers.length}
       />
 
-      {/* Users List */}
-      <UserList
+      {/* Users Table */}
+      <UserTable
         users={filteredUsers}
         selectedUsers={selectedUsers}
         onSelectUser={handleSelectUser}
@@ -407,7 +407,6 @@ export default function UsersManagementPage() {
         onDeleteUser={handleDeleteUser}
         loading={loading}
         currentUserRole={currentUser?.role || ''}
-        showSelection={showSelection}
       />
 
       {/* Floating Bulk Actions */}

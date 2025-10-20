@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, CreditCard as Edit, Trash2, Ban, CircleCheck as CheckCircle, Copy, ExternalLink, ArrowRightLeft, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';

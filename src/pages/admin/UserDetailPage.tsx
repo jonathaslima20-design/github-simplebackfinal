@@ -232,39 +232,42 @@ export default function UserDetailPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate('/admin/users')}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Detalhes do Usuário</h1>
-            <p className="text-muted-foreground">Informações completas e gerenciamento</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl md:text-3xl font-bold truncate">Detalhes do Usuário</h1>
+            <p className="text-sm text-muted-foreground hidden sm:block">Informações completas e gerenciamento</p>
           </div>
         </div>
-        <div className="flex gap-2">
+
+        <div className="flex flex-wrap gap-2">
           {user.slug && (
-            <Button variant="outline" asChild>
+            <Button variant="outline" size="sm" asChild className="flex-1 sm:flex-none">
               <a href={`/${user.slug}`} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Ver Vitrine
+                <ExternalLink className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Ver Vitrine</span>
               </a>
             </Button>
           )}
           <Button
             variant={user.is_blocked ? "default" : "destructive"}
+            size="sm"
             onClick={handleToggleBlock}
+            className="flex-1 sm:flex-none"
           >
             {user.is_blocked ? (
               <>
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Desbloquear
+                <CheckCircle className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Desbloquear</span>
               </>
             ) : (
               <>
-                <Ban className="h-4 w-4 mr-2" />
-                Bloquear
+                <Ban className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Bloquear</span>
               </>
             )}
           </Button>
@@ -421,41 +424,41 @@ export default function UserDetailPage() {
           </CardContent>
         </Card>
 
-        <div className="md:col-span-2 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="md:col-span-2 space-y-4 md:space-y-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Total de Produtos</CardTitle>
+              <CardHeader className="pb-2 md:pb-3">
+                <CardTitle className="text-xs md:text-sm font-medium">Total de Produtos</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.totalProducts}</div>
+                <div className="text-xl md:text-2xl font-bold">{stats.totalProducts}</div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Produtos Ativos</CardTitle>
+              <CardHeader className="pb-2 md:pb-3">
+                <CardTitle className="text-xs md:text-sm font-medium">Produtos Ativos</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">{stats.activeProducts}</div>
+                <div className="text-xl md:text-2xl font-bold text-green-600">{stats.activeProducts}</div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Vendidos</CardTitle>
+              <CardHeader className="pb-2 md:pb-3">
+                <CardTitle className="text-xs md:text-sm font-medium">Vendidos</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-600">{stats.soldProducts}</div>
+                <div className="text-xl md:text-2xl font-bold text-blue-600">{stats.soldProducts}</div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
+              <CardHeader className="pb-2 md:pb-3">
+                <CardTitle className="text-xs md:text-sm font-medium">Valor Total</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-xl md:text-2xl font-bold">
                   {new Intl.NumberFormat('pt-BR', {
                     style: 'currency',
                     currency: user.currency || 'BRL'
@@ -466,10 +469,19 @@ export default function UserDetailPage() {
           </div>
 
           <Tabs defaultValue="products" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="products">Produtos</TabsTrigger>
-              <TabsTrigger value="subscription">Assinatura</TabsTrigger>
-              <TabsTrigger value="referrals">Indicações</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 h-auto">
+              <TabsTrigger value="products" className="text-xs sm:text-sm px-2 py-2">
+                <span className="hidden sm:inline">Produtos</span>
+                <ShoppingBag className="h-4 w-4 sm:hidden" />
+              </TabsTrigger>
+              <TabsTrigger value="subscription" className="text-xs sm:text-sm px-2 py-2">
+                <span className="hidden sm:inline">Assinatura</span>
+                <CheckCircle className="h-4 w-4 sm:hidden" />
+              </TabsTrigger>
+              <TabsTrigger value="referrals" className="text-xs sm:text-sm px-2 py-2">
+                <span className="hidden sm:inline">Indicações</span>
+                <UserIcon className="h-4 w-4 sm:hidden" />
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="products" className="space-y-4">
@@ -487,83 +499,167 @@ export default function UserDetailPage() {
                       <p>Nenhum produto cadastrado</p>
                     </div>
                   ) : (
-                    <div className="rounded-md border">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Produto</TableHead>
-                            <TableHead>Categoria</TableHead>
-                            <TableHead>Preço</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Cadastrado em</TableHead>
-                            <TableHead className="text-right">Ações</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {products.map((product) => (
-                            <TableRow key={product.id}>
-                              <TableCell>
-                                <div className="flex items-center gap-3">
-                                  {product.featured_image_url && (
-                                    <img
-                                      src={product.featured_image_url}
-                                      alt={product.title}
-                                      className="w-10 h-10 rounded object-cover"
-                                    />
+                    <>
+                      <div className="hidden md:block rounded-md border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Produto</TableHead>
+                              <TableHead>Categoria</TableHead>
+                              <TableHead>Preço</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead>Cadastrado em</TableHead>
+                              <TableHead className="text-right">Ações</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {products.map((product) => (
+                              <TableRow key={product.id}>
+                                <TableCell>
+                                  <div className="flex items-center gap-3">
+                                    {product.featured_image_url && (
+                                      <img
+                                        src={product.featured_image_url}
+                                        alt={product.title}
+                                        className="w-10 h-10 rounded object-cover"
+                                      />
+                                    )}
+                                    <div>
+                                      <div className="font-medium">{product.title}</div>
+                                      {product.brand && (
+                                        <div className="text-xs text-muted-foreground">{product.brand}</div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  {product.category.length > 0 ? (
+                                    <div className="flex flex-wrap gap-1">
+                                      {product.category.slice(0, 2).map((cat, idx) => (
+                                        <Badge key={idx} variant="outline" className="text-xs">
+                                          {cat}
+                                        </Badge>
+                                      ))}
+                                      {product.category.length > 2 && (
+                                        <Badge variant="outline" className="text-xs">
+                                          +{product.category.length - 2}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-muted-foreground">-</span>
                                   )}
-                                  <div>
-                                    <div className="font-medium">{product.title}</div>
-                                    {product.brand && (
-                                      <div className="text-xs text-muted-foreground">{product.brand}</div>
-                                    )}
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                {product.category.length > 0 ? (
-                                  <div className="flex flex-wrap gap-1">
-                                    {product.category.slice(0, 2).map((cat, idx) => (
-                                      <Badge key={idx} variant="outline" className="text-xs">
-                                        {cat}
-                                      </Badge>
-                                    ))}
-                                    {product.category.length > 2 && (
-                                      <Badge variant="outline" className="text-xs">
-                                        +{product.category.length - 2}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className="text-muted-foreground">-</span>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                {product.price ? (
-                                  <div>
-                                    {product.discounted_price && (
-                                      <div className="text-xs line-through text-muted-foreground">
+                                </TableCell>
+                                <TableCell>
+                                  {product.price ? (
+                                    <div>
+                                      {product.discounted_price && (
+                                        <div className="text-xs line-through text-muted-foreground">
+                                          {new Intl.NumberFormat('pt-BR', {
+                                            style: 'currency',
+                                            currency: user.currency || 'BRL'
+                                          }).format(product.price)}
+                                        </div>
+                                      )}
+                                      <div className={product.discounted_price ? 'font-semibold text-green-600' : ''}>
                                         {new Intl.NumberFormat('pt-BR', {
                                           style: 'currency',
                                           currency: user.currency || 'BRL'
-                                        }).format(product.price)}
+                                        }).format(product.discounted_price || product.price)}
                                       </div>
-                                    )}
-                                    <div className={product.discounted_price ? 'font-semibold text-green-600' : ''}>
-                                      {new Intl.NumberFormat('pt-BR', {
-                                        style: 'currency',
-                                        currency: user.currency || 'BRL'
-                                      }).format(product.discounted_price || product.price)}
                                     </div>
-                                  </div>
-                                ) : (
-                                  <span className="text-muted-foreground">-</span>
+                                  ) : (
+                                    <span className="text-muted-foreground">-</span>
+                                  )}
+                                </TableCell>
+                                <TableCell>{getStatusBadge(product.status)}</TableCell>
+                                <TableCell>
+                                  {format(new Date(product.created_at), 'dd/MM/yyyy', { locale: ptBR })}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  {user.slug && (
+                                    <Button variant="outline" size="sm" asChild>
+                                      <a
+                                        href={`/${user.slug}/produtos/${product.id}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <Eye className="h-4 w-4" />
+                                      </a>
+                                    </Button>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+
+                      <div className="md:hidden space-y-3">
+                        {products.map((product) => (
+                          <Card key={product.id}>
+                            <CardContent className="p-4 space-y-3">
+                              <div className="flex items-start gap-3">
+                                {product.featured_image_url && (
+                                  <img
+                                    src={product.featured_image_url}
+                                    alt={product.title}
+                                    className="w-16 h-16 rounded object-cover flex-shrink-0"
+                                  />
                                 )}
-                              </TableCell>
-                              <TableCell>{getStatusBadge(product.status)}</TableCell>
-                              <TableCell>
-                                {format(new Date(product.created_at), 'dd/MM/yyyy', { locale: ptBR })}
-                              </TableCell>
-                              <TableCell className="text-right">
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-medium text-sm line-clamp-2">{product.title}</h4>
+                                  {product.brand && (
+                                    <p className="text-xs text-muted-foreground">{product.brand}</p>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div>
+                                  {product.price ? (
+                                    <div>
+                                      {product.discounted_price && (
+                                        <div className="text-xs line-through text-muted-foreground">
+                                          {new Intl.NumberFormat('pt-BR', {
+                                            style: 'currency',
+                                            currency: user.currency || 'BRL'
+                                          }).format(product.price)}
+                                        </div>
+                                      )}
+                                      <div className={`text-sm font-semibold ${product.discounted_price ? 'text-green-600' : ''}`}>
+                                        {new Intl.NumberFormat('pt-BR', {
+                                          style: 'currency',
+                                          currency: user.currency || 'BRL'
+                                        }).format(product.discounted_price || product.price)}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <span className="text-sm text-muted-foreground">-</span>
+                                  )}
+                                </div>
+                                {getStatusBadge(product.status)}
+                              </div>
+
+                              {product.category.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                  {product.category.slice(0, 3).map((cat, idx) => (
+                                    <Badge key={idx} variant="outline" className="text-xs">
+                                      {cat}
+                                    </Badge>
+                                  ))}
+                                  {product.category.length > 3 && (
+                                    <Badge variant="outline" className="text-xs">
+                                      +{product.category.length - 3}
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
+
+                              <div className="flex items-center justify-between pt-2 border-t">
+                                <span className="text-xs text-muted-foreground">
+                                  {format(new Date(product.created_at), 'dd/MM/yyyy', { locale: ptBR })}
+                                </span>
                                 {user.slug && (
                                   <Button variant="outline" size="sm" asChild>
                                     <a
@@ -571,16 +667,17 @@ export default function UserDetailPage() {
                                       target="_blank"
                                       rel="noopener noreferrer"
                                     >
-                                      <Eye className="h-4 w-4" />
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      Ver
                                     </a>
                                   </Button>
                                 )}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </>
                   )}
                 </CardContent>
               </Card>
@@ -611,50 +708,91 @@ export default function UserDetailPage() {
                       <p>Nenhuma indicação realizada</p>
                     </div>
                   ) : (
-                    <div className="rounded-md border">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Usuário Indicado</TableHead>
-                            <TableHead>Plano</TableHead>
-                            <TableHead>Comissão</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Data</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {referrals.map((referral) => (
-                            <TableRow key={referral.id}>
-                              <TableCell>
+                    <>
+                      <div className="hidden md:block rounded-md border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Usuário Indicado</TableHead>
+                              <TableHead>Plano</TableHead>
+                              <TableHead>Comissão</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead>Data</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {referrals.map((referral) => (
+                              <TableRow key={referral.id}>
+                                <TableCell>
+                                  <div>
+                                    <div className="font-medium">
+                                      {referral.referred_user?.name || 'N/A'}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      {referral.referred_user?.email || 'N/A'}
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>{referral.plan_type}</TableCell>
+                                <TableCell className="font-semibold">
+                                  {new Intl.NumberFormat('pt-BR', {
+                                    style: 'currency',
+                                    currency: user.currency || 'BRL'
+                                  }).format(referral.amount)}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant={referral.status === 'paid' ? 'default' : 'secondary'}>
+                                    {referral.status === 'paid' ? 'Pago' : 'Pendente'}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  {format(new Date(referral.created_at), 'dd/MM/yyyy', { locale: ptBR })}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+
+                      <div className="md:hidden space-y-3">
+                        {referrals.map((referral) => (
+                          <Card key={referral.id}>
+                            <CardContent className="p-4 space-y-3">
+                              <div>
+                                <h4 className="font-medium text-sm">
+                                  {referral.referred_user?.name || 'N/A'}
+                                </h4>
+                                <p className="text-xs text-muted-foreground">
+                                  {referral.referred_user?.email || 'N/A'}
+                                </p>
+                              </div>
+
+                              <div className="flex items-center justify-between">
                                 <div>
-                                  <div className="font-medium">
-                                    {referral.referred_user?.name || 'N/A'}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">
-                                    {referral.referred_user?.email || 'N/A'}
-                                  </div>
+                                  <p className="text-xs text-muted-foreground">Plano</p>
+                                  <p className="text-sm font-medium">{referral.plan_type}</p>
                                 </div>
-                              </TableCell>
-                              <TableCell>{referral.plan_type}</TableCell>
-                              <TableCell className="font-semibold">
-                                {new Intl.NumberFormat('pt-BR', {
-                                  style: 'currency',
-                                  currency: user.currency || 'BRL'
-                                }).format(referral.amount)}
-                              </TableCell>
-                              <TableCell>
                                 <Badge variant={referral.status === 'paid' ? 'default' : 'secondary'}>
                                   {referral.status === 'paid' ? 'Pago' : 'Pendente'}
                                 </Badge>
-                              </TableCell>
-                              <TableCell>
-                                {format(new Date(referral.created_at), 'dd/MM/yyyy', { locale: ptBR })}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
+                              </div>
+
+                              <div className="flex items-center justify-between pt-2 border-t">
+                                <div className="text-sm font-semibold text-green-600">
+                                  {new Intl.NumberFormat('pt-BR', {
+                                    style: 'currency',
+                                    currency: user.currency || 'BRL'
+                                  }).format(referral.amount)}
+                                </div>
+                                <span className="text-xs text-muted-foreground">
+                                  {format(new Date(referral.created_at), 'dd/MM/yyyy', { locale: ptBR })}
+                                </span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </>
                   )}
                 </CardContent>
               </Card>

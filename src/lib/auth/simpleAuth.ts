@@ -348,7 +348,7 @@ export async function registerUser(
 
     const { data: userProfile, error: createError } = await supabase
       .from('users')
-      .insert({
+      .upsert({
         email: normalizedEmail,
         name: userData.name,
         niche_type: userData.niche_type || 'diversos',
@@ -356,6 +356,8 @@ export async function registerUser(
         role: 'corretor',
         is_blocked: false,
         created_at: new Date().toISOString()
+      }, {
+        onConflict: 'email'
       })
       .select()
       .single();

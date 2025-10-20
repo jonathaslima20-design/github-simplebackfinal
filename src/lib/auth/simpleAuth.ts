@@ -314,7 +314,7 @@ export async function authenticateUser(email: string, password: string): Promise
 export async function registerUser(
   email: string,
   password: string,
-  userData: { name: string; niche_type?: string; whatsapp: string }
+  userData: { name: string; niche_type?: string; whatsapp?: string }
 ): Promise<{
   user: StoredUser | null;
   error: string | null;
@@ -344,13 +344,15 @@ export async function registerUser(
     }
 
     // Create user profile in the users table
+    console.log('📝 Creating user with WhatsApp:', userData.whatsapp);
+
     const { data: userProfile, error: createError } = await supabase
       .from('users')
       .insert({
         email: normalizedEmail,
         name: userData.name,
         niche_type: userData.niche_type || 'diversos',
-        whatsapp: userData.whatsapp,
+        whatsapp: userData.whatsapp || null,
         role: 'corretor',
         is_blocked: false,
         created_at: new Date().toISOString()

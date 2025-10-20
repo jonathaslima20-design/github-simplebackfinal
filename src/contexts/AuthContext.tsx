@@ -17,7 +17,7 @@ interface AuthContextType {
   user: AppUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string, userData: { name: string; niche_type?: string; whatsapp: string }) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, userData: { name: string; niche_type?: string; whatsapp?: string }) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   updateUser: (updates: Partial<AppUser>) => Promise<{ error: string | null }>;
   refreshUser: () => Promise<void>;

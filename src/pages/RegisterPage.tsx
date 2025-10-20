@@ -71,11 +71,11 @@ export default function RegisterPage() {
     
     try {
       // Clean WhatsApp number before sending
-      const cleanedWhatsApp = data.whatsapp ? cleanWhatsAppNumber(data.whatsapp) : undefined;
-      
+      const cleanedWhatsApp = cleanWhatsAppNumber(data.whatsapp);
+
       const { error } = await signUp(
-        data.email, 
-        data.password, 
+        data.email,
+        data.password,
         {
           name: data.name,
           niche_type: 'diversos',
